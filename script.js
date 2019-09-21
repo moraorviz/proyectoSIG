@@ -4,7 +4,16 @@ let ruta = {};
 let map;
 let kmlLayer;
 
+var infowindow;
+var OVIEDO;
+var markers = [];
+
+const MENSAJE_GEOLOC = "Cargado fichero KML (Google Maps API para JS)";
+const MENSAJE_SERVICIO_WMS = "Cargado servicio WMS (fosas comunes)";
+const MENSAJE_SERVICIO_PLACES = "Cargados bares de Oviedo (Google Servicio Places)";
+const MENSAJE_ELEGIR = "Elige una acción";
 const mainArea = {} 
+
 mainArea.controlPanel = document.querySelector(".controlpanel");
 mainArea.mapa = document.querySelector(".mapa");
 mainArea.mapa.style.overflow = "hidden";
@@ -15,6 +24,9 @@ mainArea.botones.forEach(function(item) {
     item.addEventListener('mouseover', changeBackground);
     item.addEventListener('mouseout', restoreBackground);
 });
+mainArea.texto = document.querySelector(".texto");
+mainArea.texto.innerHTML = MENSAJE_ELEGIR;
+
 const WMSURL = "http://mapadefosas.mjusticia.es/geoserver/wms?";
 const WMSLAYERS = "INTERVENIDA,NOINTERV";
 
@@ -29,6 +41,8 @@ let CapaWMS = function(coord, zoom) {
     serviceURL += "&BBOX=" + bbox;
     return serviceURL;
 }
+
+var servicioSitios;
 
 function enableButtons() {
     mainArea.botones.forEach(function(item) {
@@ -98,6 +112,7 @@ function handleBtn(e){
 function mostrarRuta() {
     console.log("Mostrando ruta.");
     cargarRuta("http://15.188.2.85/ruta.kml");
+    mainArea.texto.innerText = MENSAJE_GEOLOC;
 }
 
 function removerRuta() {
@@ -105,6 +120,7 @@ function removerRuta() {
     kmlLayer.setMap(null);
     kmlLayer = null;
     map.setZoom(7);
+    mainArea.texto.innerText = MENSAJE_ELEGIR;
 }
 
 function mostrarWMS() {
@@ -115,30 +131,83 @@ function mostrarWMS() {
     }
     var overlayWMS = new google.maps.ImageMapType(overlayOptions);
     map.overlayMapTypes.push(overlayWMS);
+    mainArea.texto.innerText = MENSAJE_SERVICIO_WMS;
 }
 
 function removerWMS() {
     console.log("Removiendo capa WMS");
     map.overlayMapTypes.clear();
+    mainArea.texto.innerText = MENSAJE_ELEGIR;
 }
 
 function mostrarServicioMaps() {
     console.log("Mostrando servicio maps.");
+
+    var request = {
+        location: OVIEDO,
+        radius: '500',
+        type: ['bar']
+    };
+
+    servicioSitios = new google.maps.places.PlacesService(map);
+    servicioSitios.nearbySearch(request, sitiosCallback);
+}
+
+function sitiosCallback(results, status) { 
+    console.log("Ejecutando sitiosCallback");
+    var respuesta = google.maps.places.PlacesServiceStatus;
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+        console.log("Pintando resultados.");
+        for (var i = 0; i < results.length; i++) {
+          var place = results[i];
+          crearMarcador(results[i]);
+        }
+        map.setZoom(15);
+        map.setCenter(OVIEDO);
+        mainArea.texto.innerText = MENSAJE_SERVICIO_PLACES;
+    }
+}
+
+function setMapOnAll(map) {
+    for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(map);
+    }
+}
+
+function clearMarkers() {
+    setMapOnAll(null);
+}
+
+function crearMarcador(place) {
+    var marker = new google.maps.Marker({
+        map: map,
+        position: place.geometry.location
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(place.name);
+        infowindow.open(map, this);
+    });
+    markers.push(marker);
 }
 
 function removerServicioMaps() {
     console.log("Removiendo servicio maps.");
+    clearMarkers();
+    map.setZoom(7);
+    mainArea.texto.innerText = MENSAJE_ELEGIR;
+
 }
 
 function initMap() {
     console.log("Iniciando el mapa.");
-    const OVIEDO = new google.maps.LatLng(43.3625, -5.850278);
+    OVIEDO = new google.maps.LatLng(43.3625, -5.850278);
     const ASTURIAS_BOUNDS = {
         north: 43.67,
         south: 42.83,
         east: -4.44,
         west: -7.22
     };
+    infowindow = new google.maps.InfoWindow();
     map = new google.maps.Map(mainArea.mapa, {
         center: OVIEDO,
         restriction: {

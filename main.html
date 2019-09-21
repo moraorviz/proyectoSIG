@@ -1,12 +1,14 @@
 <html>
     <head>
         <link rel="stylesheet" href="style.css">
-        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyAOIrGMRJ_QxVyJQXS5AbidHadMJwGN0bA" async defer></script>
+        <link href="https://fonts.googleapis.com/css?family=Bangers|Righteous&display=swap" rel="stylesheet"> 
+        <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyAOIrGMRJ_QxVyJQXS5AbidHadMJwGN0bA&libraries=places" async defer></script>
         <script src="script.js" defer></script>
         <title>Prototipo SIG</title>
     </head>
     <body>
         <div class="mainarea">
+            <div class="titulo">Prototipo SIG</div>
             <div class="controlpanel">
                 <!-- botones -->
                 <a class="boton accion1">Geolocalización</a>
@@ -14,6 +16,7 @@
                 <a class="boton accion3">Servicio Google Maps</a>
             </div>
             <div class="mapa"></div>
+            <div class="texto"></div>
         </div>
     </body>
 </html>
