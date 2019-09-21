@@ -2,10 +2,7 @@
 let usuario = {};
 let ruta = {};
 let map;
-
-const ruta1 = {
-    "nombre": "Ruta 1"
-};
+let kmlLayer;
 
 const mainArea = {} 
 mainArea.controlPanel = document.querySelector(".controlpanel");
@@ -30,14 +27,21 @@ function restoreBackground(e) {
 }
 
 function handleBtn(e){
+
+    if (e.target.classList.contains("accion1")) {
+        if (!e.target.classList.contains("pulsado")) {
+            console.log("Se lanza la accion 1.");
+            mostrarRuta();
+        } else {
+        console.log("Ya esta pulsado.");
+        removerRuta();
+        }
+    }
+
     if (e.target.classList.contains("pulsado")) {
         e.target.classList.remove("pulsado");
     } else {
         e.target.classList.add("pulsado");
-    }
-    if (e.target.classList.contains("accion1")){
-        console.log("Se lanza la accion 1.");
-        mostrarRuta();
     }
 }
 
@@ -46,10 +50,16 @@ function mostrarRuta() {
     cargarRuta("http://15.188.2.85/ruta.kml");
 }
 
+function removerRuta() {
+    kmlLayer.setMap(null);
+    kmlLayer = null;
+    map.setZoom(7);
+}
+
 function initMap() {
     console.log("Iniciando el mapa.");
-    let OVIEDO = new google.maps.LatLng(43.3625, -5.850278);
-    let ASTURIAS_BOUNDS = {
+    const OVIEDO = new google.maps.LatLng(43.3625, -5.850278);
+    const ASTURIAS_BOUNDS = {
         north: 43.67,
         south: 42.83,
         east: -4.44,
@@ -69,12 +79,12 @@ function initMap() {
 
 function cargarRuta(src) {
     let centroRuta = new google.maps.LatLng(43.389983, -5.815829);
-    //map.setCenter(centroRuta);
-    //map.setZoom(10);
-    let kmlLayer = new google.maps.KmlLayer({
+    kmlLayer = new google.maps.KmlLayer({
         url: src,
         supressInfoWindows: true,
-        preserveViewport: true,
+        preserveViewport: false,
         map: map
     });
+    map.setCenter(centroRuta);
+    map.setZoom(10);
 }
