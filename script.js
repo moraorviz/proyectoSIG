@@ -96,11 +96,12 @@ function handleBtn(e){
 }
 
 function mostrarRuta() {
-    console.log("mostrando ruta");
+    console.log("Mostrando ruta.");
     cargarRuta("http://15.188.2.85/ruta.kml");
 }
 
 function removerRuta() {
+    console.log("Removiendo la ruta.")
     kmlLayer.setMap(null);
     kmlLayer = null;
     map.setZoom(7);
