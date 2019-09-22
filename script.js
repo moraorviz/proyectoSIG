@@ -8,6 +8,8 @@ var infowindow;
 var OVIEDO;
 var markers = [];
 
+var puentes = [];
+var puentesObjects = [];
 const MENSAJE_GEOLOC = "Cargado fichero KML (Google Maps API para JS)";
 const MENSAJE_SERVICIO_WMS = "Cargado servicio WMS (fosas comunes)";
 const MENSAJE_SERVICIO_PLACES = "Cargados bares de Oviedo (Google Servicio Places)";
@@ -201,6 +203,69 @@ function removerServicioMaps() {
 function initMap() {
     console.log("Iniciando el mapa.");
     OVIEDO = new google.maps.LatLng(43.3625, -5.850278);
+
+    var puente1 = {
+        name : "Puente1",
+        photo  : "Puente1.png",
+        lat     : 43.393347,
+        lng  : -5.817745
+      };
+
+      var puente2 = {
+        name : "Puente2",
+        photo  : "Puente2.png",
+        lat     : 43.391712,
+        lng  : -5.818672
+      };
+      var puente3 = {
+        name : "Puente3",
+        photo  : "Puente3.png",
+        lat     : 43.391519,
+        lng  : -5.818225
+      };
+      var puente4 = {
+        name : "Puente4",
+        photo  : "Puente4.png",
+        lat     : 43.389000,
+        lng  : -5.812038
+      };
+      var puente5 = {
+        name : "Puente5",
+        photo  : "Puente5.png",
+        lat     : 43.388636,
+        lng  : -5.810090
+      };
+
+      var puente6 = {
+        name : "Puente6",
+        photo  : "Puente6.png",
+        lat     : 43.388868,
+        lng  : -5.809895
+      };
+      var puente7 = {
+        name : "Puente7",
+        photo  : "Puente7.png",
+        lat     : 43.387968,
+        lng  : -5.807780
+      };
+      var puente8 = {
+        name : "Puente8",
+        photo  : "Puente8.png",
+        lat     : 43.386189,
+        lng  : -5.810507
+      };
+    puentesObjects = [puente1, puente2, puente3, puente4, puente5, puente6, puente7, puente8]
+    Puente1Coord = new google.maps.LatLng(puente1.lat,puente1.lng);
+    Puente2Coord = new google.maps.LatLng(puente2.lat,puente2.lng);
+    Puente3Coord = new google.maps.LatLng(puente3.lat,puente3.lng);
+    Puente4Coord = new google.maps.LatLng(puente4.lat,puente4.lng);
+    Puente5Coord = new google.maps.LatLng(puente5.lat,puente5.lng);
+    Puente6Coord = new google.maps.LatLng(puente6.lat,puente6.lng);
+    Puente7Coord = new google.maps.LatLng(puente7.lat,puente7.lng);
+    Puente8Coord = new google.maps.LatLng(puente8.lat,puente8.lng);
+
+    puentes = [Puente1Coord,Puente2Coord,Puente3Coord,Puente4Coord,Puente5Coord,Puente6Coord,Puente7Coord,Puente8Coord]
+
     const ASTURIAS_BOUNDS = {
         north: 43.67,
         south: 42.83,
@@ -230,4 +295,60 @@ function cargarRuta(src) {
     });
     map.setCenter(centroRuta);
     map.setZoom(10);
+    
+    google.maps.event.addListener(kmlLayer, 'click', function(kmlEvent) {
+        coords = new google.maps.LatLng(kmlEvent.latLng.lat(),kmlEvent.latLng.lng());
+        findNearestMarker(coords);
+    });
+
+}
+
+function findNearestMarker(coords){
+    var minDist = 1000,
+    nearest_text = '*None*',
+    markerDist,
+
+    i;
+
+  // iterate over objects and calculate distance between them
+  for (i = 0; i < puentes.length; i += 1) {
+    markerDist = distance(puentes[i].lat(),puentes[i].lng(), coords.lat(),coords.lng())
+    if (markerDist < minDist) {
+      minDist = markerDist;
+      nearest_text = puentes[i].lat();
+    }
+  }
+  if(nearest_text != ""){
+    for(k = 0; k<puentesObjects.length;k++){
+        if(nearest_text == puentesObjects[k].lat){
+            elemento = document.getElementById('fotoPuente');
+            if (elemento.hasChildNodes()) {
+                elemento.removeChild(elemento.childNodes[0]);
+                elemento.removeChild(elemento.childNodes[0]);
+              }
+            var h3 = document.createElement('h3');
+            h3.innerText = "Puente más cercano:";
+            
+            var img = document.createElement('img');
+            img.src = "./images/"+puentesObjects[k].photo ;
+            img.style.height= "60%";
+            elemento.appendChild(h3);
+            elemento.appendChild(img);
+        }
+    }
+  }
+}
+
+function distance(lat1,lon1,lat2,lon2) {
+	var R = 6371; // km (change this constant to get miles)
+	var dLat = (lat2-lat1) * Math.PI / 180;
+	var dLon = (lon2-lon1) * Math.PI / 180;
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+		Math.cos(lat1 * Math.PI / 180 ) * Math.cos(lat2 * Math.PI / 180 ) *
+		Math.sin(dLon/2) * Math.sin(dLon/2);
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	var d = R * c;
+	if (d>1) return Math.round(d);
+	else if (d<=1) return Math.round(d*1000);
+	return d;
 }
